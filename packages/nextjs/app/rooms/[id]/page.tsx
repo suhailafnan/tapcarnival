@@ -1,10 +1,12 @@
 "use client";
 
+import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 type Room = { id: string; name: string; createdAt: number; players: string[] };
 
+// Load recent rooms from sessionStorage (simple hackathon-friendly cache)
 const loadRooms = (): Room[] => {
   if (typeof window === "undefined") return [];
   try {
@@ -15,11 +17,26 @@ const loadRooms = (): Room[] => {
   }
 };
 
-export default function RoomLobby({ params }: { params: { id: string } }) {
-  const id = (params.id || "").toUpperCase();
+export default function RoomLobby({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap async params per Next.js 15 dynamic APIs guidance
+  const { id: rawId } = React.use(params); // [web:706]
+  const id = (rawId || "").toUpperCase();
+
   const [rooms, setRooms] = useState<Room[]>([]);
   useEffect(() => setRooms(loadRooms()), []);
+
   const room = useMemo(() => rooms.find(r => r.id === id), [rooms, id]);
+
+  // Helpers to compute share URL safely
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/rooms/${id}` : `/rooms/${id}`;
+
+  const copyText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // clipboard may require https/user gesture; ignore in dev
+    }
+  };
 
   return (
     <main className="min-h-screen bg-white text-gray-900">
@@ -39,12 +56,17 @@ export default function RoomLobby({ params }: { params: { id: string } }) {
 
             <div className="mt-4">
               <div className="text-sm text-gray-600">Share this code with friends:</div>
-              <div className="mt-1 font-mono text-lg">{room.id}</div>
+              <div className="mt-1 font-mono text-lg">{id}</div>
               <div className="mt-2 text-xs text-gray-500 break-all">
-                Link:
-                <span className="ml-1">
-                  {typeof window !== "undefined" ? `${window.location.origin}/rooms/${room.id}` : `/rooms/${room.id}`}
-                </span>
+                Link: <span className="ml-1">{shareUrl}</span>
+              </div>
+              <div className="mt-2 flex gap-2">
+                <button className="btn btn-outline btn-sm" onClick={() => copyText(shareUrl)}>
+                  Copy Link
+                </button>
+                <button className="btn btn-outline btn-sm" onClick={() => copyText(id)}>
+                  Copy Code
+                </button>
               </div>
             </div>
 
@@ -55,6 +77,24 @@ export default function RoomLobby({ params }: { params: { id: string } }) {
               <Link href="/leaderboard" className="btn btn-secondary">
                 View Leaderboard
               </Link>
+            </div>
+
+            <div className="mt-4">
+              <div className="text-sm text-gray-600 mb-1">Jump into a game:</div>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/play/tap" className="btn btn-outline btn-sm">
+                  Tap Race
+                </Link>
+                <Link href="/play/reflex" className="btn btn-outline btn-sm">
+                  Reflex
+                </Link>
+                <Link href="/play/aim" className="btn btn-outline btn-sm">
+                  Aim
+                </Link>
+                <Link href="/play/memory" className="btn btn-outline btn-sm">
+                  Memory
+                </Link>
+              </div>
             </div>
           </div>
         ) : (
