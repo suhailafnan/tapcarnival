@@ -4,7 +4,15 @@ import React, { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bars3Icon, BugAntIcon, PuzzlePieceIcon, TrophyIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  BugAntIcon,
+  BuildingOfficeIcon,
+  CloudArrowUpIcon,
+  PuzzlePieceIcon,
+  TrophyIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 
@@ -32,6 +40,16 @@ export const menuLinks: HeaderMenuLink[] = [
     icon: <TrophyIcon className="h-5 w-5" />,
   },
   {
+    label: "Storage",
+    href: "/storage",
+    icon: <CloudArrowUpIcon className="h-5 w-5" />,
+  },
+  {
+    label: "Real Estate",
+    href: "/real-estate",
+    icon: <BuildingOfficeIcon className="h-5 w-5" />,
+  },
+  {
     label: "Debug",
     href: "/debug",
     icon: <BugAntIcon className="h-5 w-5" />,
@@ -51,10 +69,14 @@ export const HeaderMenuLinks = () => {
               href={href}
               passHref
               className={`${
-                isActive ? "bg-secondary shadow-md" : ""
-              } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-2 px-4 text-sm rounded-full gap-2 grid grid-flow-col font-medium items-center transition-colors duration-300`}
+                isActive ? "bg-blue-100 text-blue-700 shadow-sm" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              } flex items-center gap-2 py-2 px-4 text-sm rounded-lg font-medium transition-all duration-200 group`}
             >
-              {icon}
+              <span
+                className={`${isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-600"} transition-colors`}
+              >
+                {icon}
+              </span>
               <span>{label}</span>
             </Link>
           </li>
@@ -77,57 +99,61 @@ export const Header = () => {
 
   return (
     <div
-      className="sticky lg:static top-0 navbar bg-base-100 min-h-0 flex-shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2"
+      className="sticky top-0 navbar bg-white/80 backdrop-blur-md border-b border-gray-200 min-h-0 flex-shrink-0 justify-between z-20 shadow-sm"
       ref={burgerMenuRef}
     >
       {/* Logo and brand name */}
       <div className="navbar-start w-auto lg:w-1/2">
         <div className="lg:hidden">
-          <label
-            htmlFor="my-drawer"
-            className="btn btn-ghost"
+          <button
+            className="btn btn-ghost btn-sm p-2"
             onClick={() => {
               setIsDrawerOpen(prevIsOpen => !prevIsOpen);
             }}
           >
-            <Bars3Icon className="h-1/2" />
-          </label>
+            <Bars3Icon className="h-6 w-6" />
+          </button>
         </div>
-        <Link href="/" passHref className="hidden lg:flex items-center gap-2 ml-4 mr-6 shrink-0">
+
+        <Link href="/" passHref className="flex items-center gap-3 ml-2 lg:ml-4 mr-6 shrink-0">
           <div className="flex relative w-10 h-10">
             <Image alt="TapKarnival logo" className="cursor-pointer" fill src="/logo.svg" />
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-xl leading-tight bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text">
+          <div className="hidden sm:flex flex-col">
+            <span className="font-bold text-xl leading-tight bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
               TapKarnival
             </span>
+            <span className="text-xs text-gray-500 -mt-1">Social Arcade</span>
           </div>
         </Link>
-        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
+
+        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-1">
           <HeaderMenuLinks />
         </ul>
       </div>
 
       {/* Wallet Connection */}
-      <div className="navbar-end flex-grow mr-4">
-        <RainbowKitCustomConnectButton />
-        <FaucetButton />
+      <div className="navbar-end flex-grow mr-2 lg:mr-4">
+        <div className="flex items-center gap-2">
+          <RainbowKitCustomConnectButton />
+          <FaucetButton />
+        </div>
       </div>
 
       {/* Mobile Drawer */}
       <div
-        className={`lg:hidden absolute top-16 left-0 w-full bg-base-200 transition-all duration-300 ease-in-out ${
+        className={`lg:hidden absolute top-16 left-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200 transition-all duration-300 ease-in-out ${
           isDrawerOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-        } overflow-hidden z-10`}
+        } overflow-hidden z-10 shadow-lg`}
       >
-        <ul
-          className="menu menu-compact p-4"
+        <div
+          className="p-4 space-y-2"
           onClick={() => {
             setIsDrawerOpen(false);
           }}
         >
           <HeaderMenuLinks />
-        </ul>
+        </div>
       </div>
     </div>
   );
